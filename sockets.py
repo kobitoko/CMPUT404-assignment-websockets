@@ -26,6 +26,30 @@ app = Flask(__name__)
 sockets = Sockets(app)
 app.debug = True
 
+# Taken from Abram Hindle https://github.com/abramhindle/WebSocketsExamples/blob/master/chat.py
+clients = list()
+
+# Taken from Abram Hindle https://github.com/abramhindle/WebSocketsExamples/blob/master/chat.py
+def send_all(msg):
+    for client in clients:
+        client.put( msg )
+
+# Taken from Abram Hindle https://github.com/abramhindle/WebSocketsExamples/blob/master/chat.py
+def send_all_json(obj):
+    send_all( json.dumps(obj) )
+    
+# Taken from Abram Hindle https://github.com/abramhindle/WebSocketsExamples/blob/master/chat.py
+class Client:
+    def __init__(self):
+        self.queue = queue.Queue()
+
+    def put(self, v):
+        self.queue.put_nowait(v)
+
+    def get(self):
+        return self.queue.get()
+
+
 class World:
     def __init__(self):
         self.clear()
@@ -63,6 +87,7 @@ myWorld = World()
 
 def set_listener( entity, data ):
     ''' do something with the update ! '''
+    
 
 myWorld.add_set_listener( set_listener )
 
@@ -77,11 +102,12 @@ def read_ws(ws,client):
     try:
         while True:
             dat = ws.receive()
-            print "Dat contains: " + dat
             if (dat is not None):
+                print "Dat contains: " + dat
                 world_update = json.loads(dat)
-                for key in world_update:
-                    myWorld.update(dat.entity, key, world_update[key])
+                myWorld.set(world_update.get("entity"), world_update.get("data"))
+                #for key in world_update:
+                #    myWorld.update(world_update.entity, key, world_update[key])
                 # need response??
                 send_all_json(world_update)
             else:
@@ -93,7 +119,7 @@ def read_ws(ws,client):
 def subscribe_socket(ws):
     '''Fufill the websocket URL of /subscribe, every update notify the
        websocket and read updates from the websocket '''
-    # XXX: TODO IMPLEMENT ME
+    # Taken from Abram Hindle https://github.com/abramhindle/WebSocketsExamples/blob/master/chat.py
     client = Client()
     clients.append(client)
     g = gevent.spawn( read_ws, ws, client )
@@ -117,33 +143,34 @@ def flask_post_json():
         return json.loads(request.data)
     else:
         return json.loads(request.form.keys()[0])
-
-@sockets.route("/entity/<entity>")
+        
+@app.route("/entity/<entity>", methods=['POST','PUT'])
 def update(entity):
     '''update the entities via this interface'''
-    print("AAAAAAAAAAA" + entity)
-    world_update=entity
-    for key in world_update:
-        myWorld.update(entity, key, world_update[key])
-    send_all( json.dumps(myWorld.get(entity)))
+    if request.method=='PUT':
+        world_update=flask_post_json()
+        for key in world_update:
+            myWorld.update(entity, key, world_update[key])
+    elif request.method == 'POST':
+        #  def update(self, entity, key, value):
+        myWorld.set(entity, flask_post_json())
+    return json.dumps(myWorld.get(entity))
 
-@sockets.route("/world")
+@app.route("/world", methods=['POST','GET'])
 def world():
     '''you should probably return the world here'''
-    send_all( json.dumps(myWorld.world()))
+    return json.dumps(myWorld.world())
 
-@sockets.route("/entity/<entity>")
+@app.route("/entity/<entity>")
 def get_entity(entity):
     '''This is the GET version of the entity interface, return a representation of the entity'''
-    send_all( json.dumps(myWorld.get(entity)))
+    return json.dumps(myWorld.get(entity))
 
-@sockets.route("/clear")
+@app.route("/clear", methods=['POST','GET'])
 def clear():
     '''Clear the world out!'''
     myWorld.clear()
-    send_all( json.dumps(myWorld.world()))
-
-
+    return json.dumps(myWorld.world())
 
 if __name__ == "__main__":
     ''' This doesn't work well anymore:
