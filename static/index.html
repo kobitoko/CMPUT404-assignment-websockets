@@ -125,6 +125,14 @@ function getPosition(e) {
 
 function addEntity(entity, data) {
     world[entity] = data;
+    console.log("hosting host var " + host);
+    console.log("entity:" + entity);
+    console.log("data:" + JSON.stringify(data));
+    
+    // Receive the world from server.
+    sendJSONXMLHTTPRequest('http://'+host, data, function(receivedWorld) {
+        world = receivedWorld;
+    });
     drawNextFrame(); // (but should we?)
     //XXX: Send a XHTML Request that updates the entity you just modified!
 }
