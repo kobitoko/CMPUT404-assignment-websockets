@@ -102,13 +102,17 @@ def read_ws(ws,client):
     try:
         while True:
             dat = ws.receive()
-            print(dat)
             if (dat is not None): 
+                dic = json.loads(dat)
+                #print("aaa+"+str(dic))
+                #print("aaaaaaa" + str(dic))
+                
+                #myWorld.set(dic.keys[0], dic.items()[0])
                 send_all_json(json.loads(dat))
             else:
                 break
-    except:
-        print "Exception occurred in read_ws."
+    except Exception, e:
+        print "Exception occurred in read_ws. " + str(e)
 
 @sockets.route('/subscribe')
 def subscribe_socket(ws):
