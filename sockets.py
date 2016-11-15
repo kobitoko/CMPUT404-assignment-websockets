@@ -87,7 +87,7 @@ myWorld = World()
 
 def set_listener( entity, data ):
     ''' do something with the update ! '''
-    myWorld.set(entity, data)
+    #myWorld.set(entity, data)
 
 myWorld.add_set_listener( set_listener )
 
@@ -104,10 +104,9 @@ def read_ws(ws,client):
             dat = ws.receive()
             if (dat is not None): 
                 dic = json.loads(dat)
-                #print("aaa+"+str(dic))
-                #print("aaaaaaa" + str(dic))
-                
-                #myWorld.set(dic.keys[0], dic.items()[0])
+                print("aaa+"+str(dic.keys()[0]))
+                print("aaa+"+str(dic.items()[0][1]))
+                myWorld.set(dic.keys()[0], dic.items()[0][1])
                 send_all_json(json.loads(dat))
             else:
                 break
