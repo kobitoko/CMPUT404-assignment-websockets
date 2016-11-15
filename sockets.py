@@ -87,7 +87,7 @@ myWorld = World()
 
 def set_listener( entity, data ):
     ''' do something with the update ! '''
-    
+    myWorld.set(entity, data)
 
 myWorld.add_set_listener( set_listener )
 
@@ -102,14 +102,9 @@ def read_ws(ws,client):
     try:
         while True:
             dat = ws.receive()
-            if (dat is not None):
-                print "Dat contains: " + dat
-                world_update = json.loads(dat)
-                myWorld.set(world_update.get("entity"), world_update.get("data"))
-                #for key in world_update:
-                #    myWorld.update(world_update.entity, key, world_update[key])
-                # need response??
-                send_all_json(world_update)
+            
+            if (dat is not None): 
+                send_all_json(json.loads(dat))
             else:
                 break
     except:
