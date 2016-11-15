@@ -58,9 +58,9 @@ function drawCircle(context,entity) {
         fillStyle = entity["colour"];
         strokeStyle = fillStyle;
         font = entity["fontsize"] + "pt Comic Sans";
-        fillText("Hello!", x-30, y+60);
-        arc(x, y, (entity["radius"])?entity["radius"]:50, 0, 2.0 * Math.PI, false);  
-        stroke();                                
+        fillText("Make America Great Again!", x-30, y+60);
+        //arc(x, y, (entity["radius"])?entity["radius"]:50, 0, 2.0 * Math.PI, false);  
+        //stroke();                                
     }
 }
 
@@ -242,15 +242,15 @@ mouse = (function() {
 // Add the application specific mouse listeners!
 //XXX: TODO Make these prettier!
 mouse.mousedowners.push(function(x,y,clicked,e) {
-    addEntityWithoutName({'x':x,'y':y,'colour':'Cyan'});
+    addEntityWithoutName({'x':x,'y':y,'colour':'Blue'});
 });
 
 mouse.mouseuppers.push(function(x,y,clicked,e) {
-    addEntityWithoutName({'x':x,'y':y,'colour':'DarkRed'});
+    addEntityWithoutName({'x':x,'y':y,'colour':'White'});
 });
 
 mouse.mousedraggers.push(function(x,y,clicked,e) {
-    addEntityWithoutName({'x':x,'y':y,'colour':'ForestGreen',
+    addEntityWithoutName({'x':x,'y':y,'colour':'Red',
                           'radius':10, 'fontsize':22});
 });
 
