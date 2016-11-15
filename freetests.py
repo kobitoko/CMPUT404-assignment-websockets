@@ -111,7 +111,7 @@ if __name__ == '__main__':
         ws2.close()
         gws2.join(timeout=1)
         # here's our final test
-        print "%s %s" % (ws.count , ws2.count)
+        print "aaa %s %s" % (ws.count , ws2.count)
         assert ws.count == calls, ("Expected Responses were given! %d %d" % (ws.count, calls))
         assert ws2.count >= (9*calls/10), ("2nd Client got less than 9/10 of the results! %s" % ws2.count)
         print "Looks like the tests passed!"

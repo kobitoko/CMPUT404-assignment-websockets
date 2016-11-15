@@ -79,12 +79,11 @@ def read_ws(ws,client):
             dat = ws.receive()
             print "Dat contains: " + dat
             if (dat is not None):
-                print "Dat contains: " + dat
                 world_update = json.loads(dat)
                 for key in world_update:
                     myWorld.update(dat.entity, key, world_update[key])
                 # need response??
-                #send_all_json("done")
+                send_all_json(world_update)
             else:
                 break
     except:
@@ -119,33 +118,30 @@ def flask_post_json():
     else:
         return json.loads(request.form.keys()[0])
 
-@app.route("/entity/<entity>", methods=['POST','PUT'])
+@sockets.route("/entity/<entity>")
 def update(entity):
     '''update the entities via this interface'''
-    if request.method=='PUT':
-        world_update=flask_post_json()
-        for key in world_update:
-            myWorld.update(entity, key, world_update[key])
-    elif request.method == 'POST':
-        #  def update(self, entity, key, value):
-        myWorld.set(entity, flask_post_json())
-    return json.dumps(myWorld.get(entity))
+    print("AAAAAAAAAAA" + entity)
+    world_update=entity
+    for key in world_update:
+        myWorld.update(entity, key, world_update[key])
+    send_all( json.dumps(myWorld.get(entity)))
 
-@app.route("/world", methods=['POST','GET'])
+@sockets.route("/world")
 def world():
     '''you should probably return the world here'''
-     return json.dumps(myWorld.world())
+    send_all( json.dumps(myWorld.world()))
 
-@app.route("/entity/<entity>")
+@sockets.route("/entity/<entity>")
 def get_entity(entity):
     '''This is the GET version of the entity interface, return a representation of the entity'''
-    return json.dumps(myWorld.get(entity))
+    send_all( json.dumps(myWorld.get(entity)))
 
-@app.route("/clear", methods=['POST','GET'])
+@sockets.route("/clear")
 def clear():
     '''Clear the world out!'''
     myWorld.clear()
-    return json.dumps(myWorld.world())
+    send_all( json.dumps(myWorld.world()))
 
 
 
