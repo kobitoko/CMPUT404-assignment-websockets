@@ -104,8 +104,8 @@ def read_ws(ws,client):
             dat = ws.receive()
             if (dat is not None): 
                 dic = json.loads(dat)
-                print("aaa+"+str(dic.keys()[0]))
-                print("aaa+"+str(dic.items()[0][1]))
+                #print("aaa+"+str(dic.keys()[0]))
+                #print("aaa+"+str(dic.items()[0][1]))
                 myWorld.set(dic.keys()[0], dic.items()[0][1])
                 send_all_json(json.loads(dat))
             else:
