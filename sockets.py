@@ -102,7 +102,7 @@ def read_ws(ws,client):
     try:
         while True:
             dat = ws.receive()
-            
+            print(dat)
             if (dat is not None): 
                 send_all_json(json.loads(dat))
             else:

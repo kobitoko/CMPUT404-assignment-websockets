@@ -128,14 +128,11 @@ function getPosition(e) {
 
 function addEntity(entity, data) {
     world[entity] = data;
-    //console.log("hosting host var " + host);
-    //console.log("entity:" + entity);
-    //console.log("data:" + JSON.stringify(data));
     //XXX: Send a XHTML Request that updates the entity you just modified!    
     // Receive the world from server.
-    var dat = JSON.stringify({entity:data})
-    console.log(entity);
-    console.log(dat);
+    var dict = {};
+    dict[entity] = data;
+    var dat = JSON.stringify(dict);
     socket.send(dat);
     drawNextFrame(); // (but should we?)
 
@@ -264,13 +261,55 @@ function update() {
     drawFrame();
 }
 
+function sendJSONXMLHTTPRequest(url, objects, callback) {
+    var xhr = new XMLHttpRequest();
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState==4) {
+            try {
+                if (xhr.status==200) {
+                    // Time latency                    
+                    //var d = new Date();
+                    //var t = d.getTime();
+                    //if(objects !== null)
+                    //    console.log(" took "+ ((t-oldt))+"ms");
+                    //XXX: parse some JSON from the request!
+                    //XXX: Pass the data to the callback!
+                    if(callback !== null)
+                        callback(JSON.parse(xhr.responseText));
+                }
+            }
+            catch(e) {
+                alert('Error: ' + e.name);
+            }
+        }
+    };
+    //XXX: POST to a URL
+    //open(method, url, async) 	Specifies the type of request
+    xhr.open('POST', url, true);
+    if(objects === null) {
+        // Just send empty one, no data.
+        xhr.send();
+    } else {
+        //XXX: set the mimetype and the accept headers!
+        // Remember to use application/json !
+        xhr.setRequestHeader("content-type", "application/json");
+        xhr.send(JSON.stringify(objects));
+    }
+}
 
 function wsSetup() {
     var url = "ws://"+host+"/subscribe";   
     socket = new WebSocket(url);
     socket.onopen = function() {
         //XXX: TODO What are you going to do here?
-        socket.send("hi");
+        //socket.send("hi");
+        sendJSONXMLHTTPRequest('/world', null, function(receivedWorld) {
+        // No change means no need to update.
+        if( world !== receivedWorld) {
+            world = receivedWorld;
+            drawNextFrame();
+        }
+    });
     };
     socket.onerror = function(msg) {
         debug("WebSocket Error:" + msg.data);
@@ -278,14 +317,13 @@ function wsSetup() {
     socket.onmessage = function(msg) {  
         try {
             debug("WebSocket Recv:" + msg.data);
-            console.log("WebSocket Recv:" + msg.data);
             //XXX: TODO What are you going to do here?            
             drawNextFrame();
-            console.log("aaa" + msg.data)
-            var a = JSON.parse(msg.data)
-            world[key]
+            var parsed = JSON.parse(msg.data);
+            var key = Object.keys(parsed);
+            world[key] = parsed[key];
         } catch (e) {
-            alert("socket on message: " + e);
+            console.log("socket on message: " + e);
         }
     }; 
 }
